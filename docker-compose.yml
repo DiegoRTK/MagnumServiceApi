@@ -1,0 +1,36 @@
+version: '3.4'
+
+services:
+  magnumapi:
+    image: magnumapi
+    build:
+      context: .
+      dockerfile: ./MagnumServiceApi/Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # - ConnectionStrings__DefaultConnection=Server=sqlserver;Database=MagnumDb;User Id=sa;Password=Psplus12;TrustServerCertificate=True;
+    # depends_on:
+      # - sqlserver
+    # networks:
+    #   - mynetwork
+
+  # sqlserver:
+  #   container_name: sqlserver
+  #   image: mcr.microsoft.com/mssql/server:2019-latest
+  #   environment:
+  #     - SA_PASSWORD=Psplus12
+  #     - ACCEPT_EULA=Y
+  #     - MSSQL_SERVER_SSL_CERTIFICATE=/var/opt/mssql/certs/sqlserver.crt
+  #     - MSSQL_SERVER_SSL_KEY=/var/opt/mssql/certs/sqlserver.key
+  #   ports:
+  #     - "1433:1433"
+  #   volumes:
+  #     - ./Database/certs:/var/opt/mssql/certs
+  #   networks:
+  #     - mynetwork
+
+# networks:
+#   mynetwork:
+#     driver: bridge
