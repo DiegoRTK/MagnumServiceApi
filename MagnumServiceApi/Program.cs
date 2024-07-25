@@ -28,13 +28,7 @@ builder.Services.AddSwaggerGen();
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.ConfigureKestrel(options =>
 {
-     // Configura Kestrel para usar HTTPS
-    options.ListenAnyIP(443, listenOptions =>
-    {
-        listenOptions.UseHttps();
-    });
-
-    // Configura Kestrel para usar HTTP (si es necesario)
+    // Configura Kestrel para usar HTTP en el puerto 8080
     options.ListenAnyIP(int.Parse(port)); // O cualquier otro puerto que estés usando para HTTP
 });
 
