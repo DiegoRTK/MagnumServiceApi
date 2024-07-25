@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MagnumServiceApi")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+31151c37b0d1457956a2b632395078bf15fe0b24")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a578b12218236d79eee7324e4198d895e0a068a5")]
 [assembly: System.Reflection.AssemblyProductAttribute("MagnumServiceApi")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MagnumServiceApi")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

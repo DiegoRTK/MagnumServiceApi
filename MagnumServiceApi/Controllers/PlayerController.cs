@@ -53,14 +53,15 @@ namespace MagnumServiceApi.Controllers
         {
             try
             {
-                var (game, moves, round, roundsPlayed) = await _gameService.GetGameById(gameId);
+                var (game, moves, round, roundsPlayed, rounds) = await _gameService.GetGameById(gameId);
 
                 return Ok(new 
                 {
                     game,
                     moves,
                     round,
-                    RoundsPlayed = roundsPlayed
+                    RoundsPlayed = roundsPlayed,
+                    rounds
                 });
             }
             catch (ArgumentException ex)
@@ -78,14 +79,15 @@ namespace MagnumServiceApi.Controllers
         {
             try
             {
-                var (game, moves, round, roundsPlayed) = await _gameService.StartNewRound(gameId);
+                var (game, moves, round, roundsPlayed, rounds) = await _gameService.StartNewRound(gameId);
 
                 return Ok(new 
                 {
                     game,
                     moves,
                     round,
-                    RoundsPlayed = roundsPlayed
+                    RoundsPlayed = roundsPlayed,
+                    rounds
                 });
             }
             catch (ArgumentException ex)

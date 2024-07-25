@@ -123,7 +123,7 @@ namespace MagnumServiceApi.Services
             }
         }
 
-        public async Task<(Game game, List<Move> moves, Round round, int RoundsPlayed)> GetGameById(int gameSessionId)
+        public async Task<(Game game, List<Move> moves, Round round, int RoundsPlayed, List<Round> Rounds)> GetGameById(int gameSessionId)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
@@ -134,10 +134,10 @@ namespace MagnumServiceApi.Services
                 var moves = await _context.Moves.Where(m => m.RoundId == gameFound.CurrentRoundId).ToListAsync();
                 var round = await _context.Rounds.FindAsync(gameFound.CurrentRoundId)
                     ?? throw new ArgumentException("Round not found.");
-                var roundsPlayed = await _context.Rounds.CountAsync(r => r.GameSessionId == gameFound.Id);
+                var roundsPlayed = await _context.Rounds.Where(r => r.GameSessionId == gameFound.Id) .ToListAsync();
 
                 await transaction.CommitAsync();
-                return (gameFound, moves, round, roundsPlayed);
+                return (gameFound, moves, round, roundsPlayed.Count, roundsPlayed);
             }
             catch (ArgumentException)
             {
@@ -151,7 +151,7 @@ namespace MagnumServiceApi.Services
             }
         }
 
-        public async Task<(Game game, List<Move> moves, Round round, int RoundsPlayed)> StartNewRound(int gameSessionId)
+        public async Task<(Game game, List<Move> moves, Round round, int RoundsPlayed,  List<Round> Rounds)> StartNewRound(int gameSessionId)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
@@ -169,9 +169,9 @@ namespace MagnumServiceApi.Services
                 await _context.SaveChangesAsync();
 
                 await transaction.CommitAsync();
-                var roundsPlayed = await _context.Rounds.CountAsync(r => r.GameSessionId == gameFound.Id);
+                var roundsPlayed = await _context.Rounds.Where(r => r.GameSessionId == gameFound.Id) .ToListAsync();
 
-                return (gameFound, moves, roundCreated, roundsPlayed);
+                return (gameFound, moves, roundCreated, roundsPlayed.Count, roundsPlayed);
             }
             catch (ArgumentException)
             {

@@ -9,8 +9,8 @@ namespace MagnumServiceApi.Services
         Task<(bool FinishedGame, int? WinnerId)> CheckGameResultAsync(int gameSessionId);
         Task<(int player1Id, int player2Id, int roundId)> RegisterPlayersAsync(string player1Name, string player2Name);
 
-        Task<(Game game, List<Move> moves, Round round, int RoundsPlayed)> GetGameById(int gameSessionId);
+        Task<(Game game, List<Move> moves, Round round, int RoundsPlayed, List<Round> Rounds)> GetGameById(int gameSessionId);
 
-        Task<(Game game, List<Move> moves, Round round, int RoundsPlayed)> StartNewRound(int gameId);
+        Task<(Game game, List<Move> moves, Round round, int RoundsPlayed, List<Round> Rounds)> StartNewRound(int gameId);
     }
 }
