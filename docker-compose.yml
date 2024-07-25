@@ -2,10 +2,10 @@ version: '3.4'
 
 services:
   magnumapi:
-    image: magnumapi
+    image: magnumapitest.azurecr.io/magnum-api:latest
     build:
       context: .
-      dockerfile: ./MagnumServiceApi/Dockerfile
+      dockerfile: ./Dockerfile
     ports:
       - "8080:80"
     environment:

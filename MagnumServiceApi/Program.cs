@@ -31,6 +31,11 @@ builder.Services.AddScoped<IRoundService, RoundService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(80);
+});
+
 // Add CORS services
 builder.Services.AddCors(options =>
 {
