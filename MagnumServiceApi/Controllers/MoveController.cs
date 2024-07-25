@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using MagnumServiceApi.Models;
 using MagnumServiceApi.Services;
+using System;
 using System.Threading.Tasks;
 
 namespace MagnumServiceApi.Controllers
@@ -10,7 +11,6 @@ namespace MagnumServiceApi.Controllers
     public class MoveController : ControllerBase
     {
         private readonly IMoveService _moveService;
-
         private readonly IGameService _gameService;
 
         public MoveController(IMoveService moveService, IGameService gameService)
@@ -19,7 +19,7 @@ namespace MagnumServiceApi.Controllers
             _gameService = gameService;
         }
 
-    [HttpPost("register")]
+        [HttpPost("register")]
         public async Task<IActionResult> RegisterMoveAsync(MoveRequest request)
         {
             if (request == null)
@@ -29,25 +29,28 @@ namespace MagnumServiceApi.Controllers
 
             try
             {
-                var (hasFinishedRound, FinishedMatch, WinnerPlayerId, rounds) = await _moveService.RegisterMoveAsync(request.PlayerId, request);
+                var (hasFinishedRound, finishedMatch, winnerPlayerId, rounds) = await _moveService.RegisterMoveAsync(request.PlayerId, request);
+
                 return Ok(new
                 {
                     HasFinishedRound = hasFinishedRound,
-                    FinishedMatch,
-                    WinnerPlayerId,
+                    FinishedMatch = finishedMatch,
+                    WinnerPlayerId = winnerPlayerId,
                     RoundsPlayed = rounds
-                    // GameId = currentGame
                 });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest($"Bad request: {ex.Message}");
             }
             catch (InvalidOperationException ex)
             {
-                return NotFound(ex.Message);
+                return NotFound($"Not found: {ex.Message}");
             }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
-    // [HttpGet('game')]
     }
 }

@@ -1,7 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using MagnumServiceApi.Services;
-using System.Threading.Tasks;
 using MagnumServiceApi.Models;
+using System;
+using System.Threading.Tasks;
 
 namespace MagnumServiceApi.Controllers
 {
@@ -28,13 +29,18 @@ namespace MagnumServiceApi.Controllers
             {
                 var (player1Id, player2Id, roundId) = await _gameService.RegisterPlayersAsync(request.Player1Name, request.Player2Name);
                 var gameSessionId = await _gameService.StartGameSessionAsync(player1Id, player2Id, roundId);
-            return Ok(new 
+
+                return Ok(new 
                 { 
                     Player1 = new PlayerInfo { Id = player1Id, Name = request.Player1Name },
                     Player2 = new PlayerInfo { Id = player2Id, Name = request.Player2Name },
                     RoundId = roundId, 
                     GameSessionId = gameSessionId.Id
                 });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest($"Bad request: {ex.Message}");
             }
             catch (Exception ex)
             {
@@ -45,19 +51,51 @@ namespace MagnumServiceApi.Controllers
         [HttpGet("battle/{gameId}")]
         public async Task<IActionResult> GetBattleDetailsAsync(int gameId)
         {
-            var (game, moves, round, roundsPlayed) = await _gameService.GetGameById(gameId);
-            return Ok(new {
-                game, moves, round, roundsPlayed
-            });
+            try
+            {
+                var (game, moves, round, roundsPlayed) = await _gameService.GetGameById(gameId);
+
+                return Ok(new 
+                {
+                    game,
+                    moves,
+                    round,
+                    RoundsPlayed = roundsPlayed
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound($"Not found: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Internal server error: {ex.Message}");
+            }
         }
 
         [HttpGet("new-round/{gameId}")]
         public async Task<IActionResult> StartNewRound(int gameId)
         {
-            var (game, moves, round, roundsPlayed) = await _gameService.StartNewRound(gameId);
-            return Ok(new {
-                game, moves, round, roundsPlayed
-            });
+            try
+            {
+                var (game, moves, round, roundsPlayed) = await _gameService.StartNewRound(gameId);
+
+                return Ok(new 
+                {
+                    game,
+                    moves,
+                    round,
+                    RoundsPlayed = roundsPlayed
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound($"Not found: {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, $"Internal server error: {ex.Message}");
+            }
         }
     }
 }
