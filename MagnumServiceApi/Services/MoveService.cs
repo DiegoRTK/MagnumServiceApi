@@ -1,78 +1,134 @@
-using MagnumServiceApi.Models;
 using MagnumServiceApi.Data;
+using MagnumServiceApi.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace MagnumServiceApi.Services
 {
-    public class MoveService : IMoveService
+    public class MoveService(
+        AppDbContext context,
+        IRoundService roundService,
+        IGameService gameService
+        ) : IMoveService
     {
-        private readonly AppDbContext _context;
-        private readonly IRoundService _roundService;
+        private readonly AppDbContext _context = context;
+        private readonly IRoundService _roundService = roundService;
+        private readonly IGameService _gameService = gameService;
 
-        private readonly IGameService _gameService;
-
-        public MoveService(AppDbContext context, IRoundService roundService, IGameService gameService)
+        public async Task<(
+            bool hasFinishedRound,
+            bool FinishedMatch,
+            int? WinnerPlayerId,
+            int? RoundCount
+        )> RegisterMoveAsync(int PlayerId, MoveRequest moveRequest)
         {
-            _context = context;
-            _roundService = roundService;
-            _gameService = gameService;
-        }
-
-        public async Task<(bool hasFinishedRound, bool FinishedMatch, int? WinnerPlayerId, Game? game)> RegisterMoveAsync(int playerId, MoveRequest moveRequest)
-        {
-            var move = await _context.Moves
-                .FirstOrDefaultAsync(m => m.playerId == playerId && moveRequest.RoundId == m.RoundId);
-
-            if (move == null)
+            var transaction = await _context.Database.BeginTransactionAsync();
+            try
             {
-                move = new Move
+                var move = await _context.Moves.FirstOrDefaultAsync(m =>
+                    m.PlayerId == PlayerId && moveRequest.RoundId == m.RoundId
+                );
+
+                if (move == null)
                 {
-                    playerId = playerId,
-                    MoveType = moveRequest.MoveType,
-                    RoundId = moveRequest.RoundId
-                };
+                    move = new Move
+                    {
+                        PlayerId = PlayerId,
+                        MoveType = moveRequest.MoveType,
+                        RoundId = moveRequest.RoundId
+                    };
 
-                _context.Moves.Add(move);
-            }
-            else
-            {
-                if (move.MoveType > 0)
+                    _context.Moves.Add(move);
+                }
+                else
                 {
-                    throw new ArgumentException("Player cannot perform an extra movement.");
-                } else {
-                    move.MoveType = moveRequest.MoveType;
-                    _context.Moves.Update(move);
-                }  
-            }
-            await _context.SaveChangesAsync();
-            var (hasFinishedRound, FinishedMatch, WinnerPlayerId, game) = await ValidateRoundAsync(move.RoundId);
-            return (hasFinishedRound, FinishedMatch, WinnerPlayerId, game);
-        }
-
-        public async Task<(bool hasFinishedRound, bool FinishedMatch, int? WinnerPlayerId, Game? game)> ValidateRoundAsync(int roundId)
-        {
-            var moves = await _context.Moves
-                .Where(m => m.RoundId == roundId)
-                .ToListAsync();
-            if (moves.Count == 2)
-            {
-                var move1 = moves[0];
-                var move2 = moves[1];
-                if (move1.MoveType > 0 && move2.MoveType > 0) {
-                var (hasFinishedRound, winnerId, game) = await _roundService.DetermineWinner(move1, move2);
-                    if (hasFinishedRound)
-                    {   
-                        var (FinishedMatch, WinnerPlayerId) = await _gameService.CheckGameResultAsync(game.Id);
-                        return (true, FinishedMatch, winnerId, game);
+                    if (move.MoveType > 0)
+                    {
+                        throw new InvalidOperationException(
+                            "Player cannot perform an extra movement."
+                        );
                     }
                     else
                     {
-                        return (false, false, winnerId, game);
+                        move.MoveType = moveRequest.MoveType;
+                        _context.Moves.Update(move);
                     }
                 }
+
+                await _context.SaveChangesAsync();
+
+                var rounds = await _context.Rounds.CountAsync(r =>
+                    r.GameSessionId == moveRequest.GameId
+                );
+                var (hasFinishedRound, FinishedMatch, WinnerPlayerId) = await ValidateRoundAsync(
+                    move.RoundId
+                );
+
+                await transaction.CommitAsync();
+
+                return (hasFinishedRound, FinishedMatch, WinnerPlayerId, rounds);
             }
-            var gameFound = _context.Game.FirstOrDefault(g => g.CurrentRoundId == moves[0].RoundId);
-            return (false, false, null, null);
+            catch (InvalidOperationException ex)
+            {
+                await transaction.RollbackAsync();
+                throw new InvalidOperationException(ex.Message, ex);
+            }
+            catch (DbUpdateException ex)
+            {
+                await transaction.RollbackAsync();
+                throw new ApplicationException(
+                    "An error occurred while updating the database.",
+                    ex
+                );
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                throw new ApplicationException("An unexpected error occurred.", ex);
+            }
+        }
+
+        public async Task<(
+            bool hasFinishedRound,
+            bool FinishedMatch,
+            int? WinnerPlayerId
+        )> ValidateRoundAsync(int roundId)
+        {
+            try
+            {
+                var moves = await _context.Moves.Where(m => m.RoundId == roundId).ToListAsync();
+                if (moves.Count != 2)
+                {
+                    return (false, false, null);
+                }
+
+                var move1 = moves[0];
+                var move2 = moves[1];
+
+                if (move1.MoveType > 0 && move2.MoveType > 0)
+                {
+                    var (hasFinishedRound, winnerId, game) = await _roundService.DetermineWinner(
+                        move1,
+                        move2
+                    );
+
+                    if (hasFinishedRound)
+                    {
+                        var (FinishedMatch, WinnerPlayerId) =
+                            await _gameService.CheckGameResultAsync(game.Id);
+                        return (true, FinishedMatch, winnerId);
+                    }
+                    else
+                    {
+                        return (false, false, winnerId);
+                    }
+                }
+
+                return (false, false, null);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("An error occurred while validating the round.", ex);
+            }
         }
     }
 }

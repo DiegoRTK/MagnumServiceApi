@@ -11,9 +11,12 @@ namespace MagnumServiceApi.Controllers
     {
         private readonly IMoveService _moveService;
 
-        public MoveController(IMoveService moveService)
+        private readonly IGameService _gameService;
+
+        public MoveController(IMoveService moveService, IGameService gameService)
         {
             _moveService = moveService;
+            _gameService = gameService;
         }
 
     [HttpPost("register")]
@@ -26,13 +29,14 @@ namespace MagnumServiceApi.Controllers
 
             try
             {
-                var (hasFinishedRound, FinishedMatch, WinnerPlayerId, game) = await _moveService.RegisterMoveAsync(request.playerId, request);
+                var (hasFinishedRound, FinishedMatch, WinnerPlayerId, rounds) = await _moveService.RegisterMoveAsync(request.PlayerId, request);
                 return Ok(new
                 {
                     HasFinishedRound = hasFinishedRound,
                     FinishedMatch,
                     WinnerPlayerId,
-                    GameId = game?.Id
+                    RoundsPlayed = rounds
+                    // GameId = currentGame
                 });
             }
             catch (InvalidOperationException ex)
@@ -44,5 +48,6 @@ namespace MagnumServiceApi.Controllers
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
+    // [HttpGet('game')]
     }
 }

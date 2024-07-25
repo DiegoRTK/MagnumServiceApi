@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MagnumServiceApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240724153829_InitialCreate")]
+    [Migration("20240725030516_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

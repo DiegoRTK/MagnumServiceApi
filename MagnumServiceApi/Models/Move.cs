@@ -1,6 +1,9 @@
-namespace MagnumServiceApi.Models{
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
-    public enum MoveType   
+namespace MagnumServiceApi.Models
+{
+    public enum MoveType
     {
         NoMove,
         Stone, // Piedra
@@ -8,19 +11,25 @@ namespace MagnumServiceApi.Models{
         Scissor // Tijera
     }
 
-    public class Move {
-        public int Id {get;set;}
-        public int playerId {get;set;}
+    public class Move
+    {
+        public int Id { get; set; }
+        public int PlayerId { get; set; }
 
-        public int RoundId {get; set;}
+        public int RoundId { get; set; }
 
+        [ForeignKey(nameof(RoundId))]
+        [JsonIgnore]
         public Round Round { get; set; }
+
         public MoveType MoveType { get; set; }
     }
 
-    public class MoveRequest {
-        public int playerId {get; set;}
-        public int RoundId {get; set;}
+    public class MoveRequest
+    {
+        public int PlayerId { get; set; }
+        public int RoundId { get; set; }
         public MoveType MoveType { get; set; }
+        public int GameId { get; set; }
     }
 }

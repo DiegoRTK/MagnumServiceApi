@@ -162,3 +162,4 @@
 /Users/alejandrosanchez/Documents/Tech test/Magnum/MagnumServiceApi/obj/Debug/net8.0/MagnumServiceApi.pdb
 /Users/alejandrosanchez/Documents/Tech test/Magnum/MagnumServiceApi/obj/Debug/net8.0/MagnumServiceApi.genruntimeconfig.cache
 /Users/alejandrosanchez/Documents/Tech test/Magnum/MagnumServiceApi/obj/Debug/net8.0/ref/MagnumServiceApi.dll
+/Users/alejandrosanchez/Documents/Tech test/Magnum/MagnumServiceApi/obj/Debug/net8.0/MagnumServiceApi.sourcelink.json
