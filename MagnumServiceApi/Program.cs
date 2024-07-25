@@ -24,12 +24,11 @@ builder.Services.AddScoped<IRoundService, RoundService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Configure Kestrel to listen on the port specified by Railway
+// Configure Kestrel to listen on the port specified by Railway or default to 8080
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.ConfigureKestrel(options =>
 {
-    // Configura Kestrel para usar HTTP en el puerto 8080
-    options.ListenAnyIP(int.Parse(port)); // O cualquier otro puerto que estés usando para HTTP
+    options.ListenAnyIP(int.Parse(port));
 });
 
 // Add CORS services
@@ -64,4 +63,5 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+// Run the application and specify the address and port
+app.Run($"http://0.0.0.0:{port}");
