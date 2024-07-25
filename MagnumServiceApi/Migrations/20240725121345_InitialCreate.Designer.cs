@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MagnumServiceApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240725030516_InitialCreate")]
+    [Migration("20240725121345_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -45,9 +45,6 @@ namespace MagnumServiceApi.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CurrentRoundId")
-                        .IsUnique();
-
                     b.HasIndex("Player1Id");
 
                     b.HasIndex("Player2Id");
@@ -64,10 +61,10 @@ namespace MagnumServiceApi.Migrations
                     b.Property<int>("MoveType")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("RoundId")
+                    b.Property<int>("PlayerId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("playerId")
+                    b.Property<int>("RoundId")
                         .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
@@ -106,17 +103,14 @@ namespace MagnumServiceApi.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("GameSessionId")
+                        .IsUnique();
+
                     b.ToTable("Rounds");
                 });
 
             modelBuilder.Entity("MagnumServiceApi.Models.Game", b =>
                 {
-                    b.HasOne("MagnumServiceApi.Models.Round", "CurrentRound")
-                        .WithOne("Game")
-                        .HasForeignKey("MagnumServiceApi.Models.Game", "CurrentRoundId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("MagnumServiceApi.Models.Player", "Player1")
                         .WithMany()
                         .HasForeignKey("Player1Id")
@@ -128,8 +122,6 @@ namespace MagnumServiceApi.Migrations
                         .HasForeignKey("Player2Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("CurrentRound");
 
                     b.Navigation("Player1");
 
@@ -149,7 +141,18 @@ namespace MagnumServiceApi.Migrations
 
             modelBuilder.Entity("MagnumServiceApi.Models.Round", b =>
                 {
-                    b.Navigation("Game")
+                    b.HasOne("MagnumServiceApi.Models.Game", "Game")
+                        .WithOne("CurrentRound")
+                        .HasForeignKey("MagnumServiceApi.Models.Round", "GameSessionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Game");
+                });
+
+            modelBuilder.Entity("MagnumServiceApi.Models.Game", b =>
+                {
+                    b.Navigation("CurrentRound")
                         .IsRequired();
                 });
 #pragma warning restore 612, 618

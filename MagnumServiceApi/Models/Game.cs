@@ -34,8 +34,6 @@ namespace MagnumServiceApi.Models
         [JsonIgnore]
         public Player Player2 { get; set; }
 
-        [ForeignKey(nameof(CurrentRoundId))]
-        [JsonIgnore]
         public Round CurrentRound { get; set; }
     }
 }

@@ -24,20 +24,6 @@ namespace MagnumServiceApi.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Rounds",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "INTEGER", nullable: false)
-                        .Annotation("Sqlite:Autoincrement", true),
-                    GameSessionId = table.Column<int>(type: "INTEGER", nullable: false),
-                    WinnerId = table.Column<int>(type: "INTEGER", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Rounds", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Game",
                 columns: table => new
                 {
@@ -65,10 +51,24 @@ namespace MagnumServiceApi.Migrations
                         principalTable: "Players",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Rounds",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    GameSessionId = table.Column<int>(type: "INTEGER", nullable: false),
+                    WinnerId = table.Column<int>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Rounds", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Game_Rounds_CurrentRoundId",
-                        column: x => x.CurrentRoundId,
-                        principalTable: "Rounds",
+                        name: "FK_Rounds_Game_GameSessionId",
+                        column: x => x.GameSessionId,
+                        principalTable: "Game",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -79,7 +79,7 @@ namespace MagnumServiceApi.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    playerId = table.Column<int>(type: "INTEGER", nullable: false),
+                    PlayerId = table.Column<int>(type: "INTEGER", nullable: false),
                     RoundId = table.Column<int>(type: "INTEGER", nullable: false),
                     MoveType = table.Column<int>(type: "INTEGER", nullable: false)
                 },
@@ -95,12 +95,6 @@ namespace MagnumServiceApi.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Game_CurrentRoundId",
-                table: "Game",
-                column: "CurrentRoundId",
-                unique: true);
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Game_Player1Id",
                 table: "Game",
                 column: "Player1Id");
@@ -114,22 +108,28 @@ namespace MagnumServiceApi.Migrations
                 name: "IX_Moves_RoundId",
                 table: "Moves",
                 column: "RoundId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Rounds_GameSessionId",
+                table: "Rounds",
+                column: "GameSessionId",
+                unique: true);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Game");
-
-            migrationBuilder.DropTable(
                 name: "Moves");
 
             migrationBuilder.DropTable(
-                name: "Players");
+                name: "Rounds");
 
             migrationBuilder.DropTable(
-                name: "Rounds");
+                name: "Game");
+
+            migrationBuilder.DropTable(
+                name: "Players");
         }
     }
 }
