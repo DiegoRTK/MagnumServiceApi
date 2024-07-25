@@ -63,4 +63,4 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run("http://0.0.0.0:80");
+app.Run("");
