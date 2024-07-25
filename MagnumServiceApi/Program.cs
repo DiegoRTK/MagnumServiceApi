@@ -5,19 +5,13 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Configure DbContext según el entorno
-builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
-{
-    var env = serviceProvider.GetRequiredService<IWebHostEnvironment>();
-
-    // if (env.IsDevelopment())
-    // {
-    //     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
-    // }
-    // else
-    // {
+builder.Services.AddDbContext<AppDbContext>(
+    (serviceProvider, options) =>
+    {
+        var env = serviceProvider.GetRequiredService<IWebHostEnvironment>();
         options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
-    // }
-});
+    }
+);
 
 // Add services to the container.
 builder.Services.AddControllers();
@@ -34,17 +28,23 @@ builder.Services.AddSwaggerGen();
 var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(int.Parse(port));
+     // Configura Kestrel para usar HTTPS
+    options.ListenAnyIP(443, listenOptions =>
+    {
+        listenOptions.UseHttps();
+    });
+
+    // Configura Kestrel para usar HTTP (si es necesario)
+    options.ListenAnyIP(int.Parse(port)); // O cualquier otro puerto que estés usando para HTTP
 });
 
 // Add CORS services
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowAll",
-        builder => builder
-            .AllowAnyOrigin()
-            .AllowAnyMethod()
-            .AllowAnyHeader());
+    options.AddPolicy(
+        "AllowAll",
+        builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()
+    );
 });
 
 var app = builder.Build();
