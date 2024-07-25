@@ -23,14 +23,14 @@ jobs:
       uses: docker/login-action@v2
       with:
         registry: https://magnumapitest.azurecr.io/
-        username: ${{ secrets.AzureAppService_ContainerUsername_43feaef32b77448a9feab8df2fb58db1 }}
-        password: ${{ secrets.AzureAppService_ContainerPassword_5590cdbcf2994b4f9d9adfa6ea6985d7 }}
+        username: ${{ secrets.AzureAppService_ContainerUsername_0826a12e19a948018a058e9c8dfeb640 }}
+        password: ${{ secrets.AzureAppService_ContainerPassword_50de9ec94c964d9dbf1bd4525c1746f8 }}
 
     - name: Build and push container image to registry
       uses: docker/build-push-action@v3
       with:
         push: true
-        tags: magnumapitest.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_43feaef32b77448a9feab8df2fb58db1 }}/magnum-api:${{ github.sha }}
+        tags: magnumapitest.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_0826a12e19a948018a058e9c8dfeb640 }}/magnum-api:${{ github.sha }}
         file: ./Dockerfile
 
   deploy:
@@ -47,5 +47,5 @@ jobs:
       with:
         app-name: 'magnumwebapi'
         slot-name: 'production'
-        publish-profile: ${{ secrets.AzureAppService_PublishProfile_a80439a78424456a9298ac834df7f46e }}
-        images: 'magnumapitest.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_43feaef32b77448a9feab8df2fb58db1 }}/magnum-api:${{ github.sha }}'
+        publish-profile: ${{ secrets.AzureAppService_PublishProfile_3f0aa4599355480dbd7e4d1cd04026c1 }}
+        images: 'magnumapitest.azurecr.io/${{ secrets.AzureAppService_ContainerUsername_0826a12e19a948018a058e9c8dfeb640 }}/magnum-api:${{ github.sha }}'
