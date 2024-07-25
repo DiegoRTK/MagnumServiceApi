@@ -1,6 +1,6 @@
-using Microsoft.EntityFrameworkCore;
 using MagnumServiceApi.Data;
 using MagnumServiceApi.Services;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +20,6 @@ builder.Services.AddDbContext<AppDbContext>((serviceProvider, options) =>
 });
 
 // Add services to the container.
-// 
 builder.Services.AddControllers();
 
 builder.Services.AddScoped<IGameService, GameService>();
@@ -31,9 +30,11 @@ builder.Services.AddScoped<IRoundService, RoundService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Configure Kestrel to listen on the port specified by Railway
+var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
 builder.WebHost.ConfigureKestrel(options =>
 {
-    options.ListenAnyIP(8080);
+    options.ListenAnyIP(int.Parse(port));
 });
 
 // Add CORS services
@@ -60,7 +61,6 @@ using (var scope = app.Services.CreateScope())
     var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
     dbContext.Database.Migrate();
 }
-
 
 app.UseCors("AllowAll");
 
