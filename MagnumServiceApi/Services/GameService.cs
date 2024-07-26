@@ -41,7 +41,10 @@ namespace MagnumServiceApi.Services
             catch (DbUpdateException ex)
             {
                 await transaction.RollbackAsync();
-                throw new ApplicationException("An error occurred while updating the database.", ex);
+                throw new ApplicationException(
+                    "An error occurred while updating the database.",
+                    ex
+                );
             }
             catch (Exception ex)
             {
@@ -50,7 +53,10 @@ namespace MagnumServiceApi.Services
             }
         }
 
-        public async Task<(int player1Id, int player2Id, int roundId)> RegisterPlayersAsync(string player1Name, string player2Name)
+        public async Task<(int player1Id, int player2Id, int roundId)> RegisterPlayersAsync(
+            string player1Name,
+            string player2Name
+        )
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
@@ -89,7 +95,10 @@ namespace MagnumServiceApi.Services
             catch (DbUpdateException ex)
             {
                 await transaction.RollbackAsync();
-                throw new ApplicationException("An error occurred while updating the database.", ex);
+                throw new ApplicationException(
+                    "An error occurred while updating the database.",
+                    ex
+                );
             }
             catch (Exception ex)
             {
@@ -98,11 +107,14 @@ namespace MagnumServiceApi.Services
             }
         }
 
-        public async Task<(bool FinishedGame, int? WinnerId)> CheckGameResultAsync(int gameSessionId)
+        public async Task<(bool FinishedGame, int? WinnerId)> CheckGameResultAsync(
+            int gameSessionId
+        )
         {
             try
             {
-                var gameSession = await _context.Game.FirstOrDefaultAsync(gs => gs.Id == gameSessionId)
+                var gameSession =
+                    await _context.Game.FirstOrDefaultAsync(gs => gs.Id == gameSessionId)
                     ?? throw new ArgumentException("Game session not found.");
 
                 if (gameSession.Player1Wins == gameSession.WinningScore)
@@ -119,22 +131,37 @@ namespace MagnumServiceApi.Services
             }
             catch (Exception ex)
             {
-                throw new ApplicationException("An error occurred while checking the game result.", ex);
+                throw new ApplicationException(
+                    "An error occurred while checking the game result.",
+                    ex
+                );
             }
         }
 
-        public async Task<(Game game, List<Move> moves, Round round, int RoundsPlayed, List<Round> Rounds)> GetGameById(int gameSessionId)
+        public async Task<(
+            Game game,
+            List<Move> moves,
+            Round round,
+            int RoundsPlayed,
+            List<Round> Rounds
+        )> GetGameById(int gameSessionId)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                var gameFound = await _context.Game.FirstOrDefaultAsync(g => g.Id == gameSessionId)
+                var gameFound =
+                    await _context.Game.FirstOrDefaultAsync(g => g.Id == gameSessionId)
                     ?? throw new ArgumentException("Game session not found.");
 
-                var moves = await _context.Moves.Where(m => m.RoundId == gameFound.CurrentRoundId).ToListAsync();
-                var round = await _context.Rounds.FindAsync(gameFound.CurrentRoundId)
+                var moves = await _context
+                    .Moves.Where(m => m.RoundId == gameFound.CurrentRoundId)
+                    .ToListAsync();
+                var round =
+                    await _context.Rounds.FindAsync(gameFound.CurrentRoundId)
                     ?? throw new ArgumentException("Round not found.");
-                var roundsPlayed = await _context.Rounds.Where(r => r.GameSessionId == gameFound.Id) .ToListAsync();
+                var roundsPlayed = await _context
+                    .Rounds.Where(r => r.GameSessionId == gameFound.Id)
+                    .ToListAsync();
 
                 await transaction.CommitAsync();
                 return (gameFound, moves, round, roundsPlayed.Count, roundsPlayed);
@@ -151,16 +178,34 @@ namespace MagnumServiceApi.Services
             }
         }
 
-        public async Task<(Game game, List<Move> moves, Round round, int RoundsPlayed,  List<Round> Rounds)> StartNewRound(int gameSessionId)
+        public async Task<(
+            Game game,
+            List<Move> moves,
+            Round round,
+            int RoundsPlayed,
+            List<Round> Rounds
+        )> StartNewRound(int gameSessionId)
         {
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                var gameFound = await _context.Game.FirstOrDefaultAsync(g => g.Id == gameSessionId)
+                var gameFound =
+                    await _context.Game.FirstOrDefaultAsync(g => g.Id == gameSessionId)
                     ?? throw new ArgumentException("Game session not found.");
 
-                var moves = await _context.Moves.Where(m => m.RoundId == gameFound.CurrentRoundId).ToListAsync();
-
+                var moves = await _context
+                    .Moves.Where(m => m.RoundId == gameFound.CurrentRoundId)
+                    .ToListAsync();
+                if (
+                    gameFound.Player1Wins == gameFound.WinningScore
+                    || gameFound.Player2Wins == gameFound.WinningScore
+                )
+                {
+                    await transaction.RollbackAsync();
+                    throw new ApplicationException(
+                        "Cannot create a new round due to limit of rounds won: 3"
+                    );
+                }
                 var roundCreated = new Round { WinnerId = 0, GameSessionId = gameSessionId };
                 _context.Rounds.Add(roundCreated);
                 await _context.SaveChangesAsync();
@@ -169,7 +214,9 @@ namespace MagnumServiceApi.Services
                 await _context.SaveChangesAsync();
 
                 await transaction.CommitAsync();
-                var roundsPlayed = await _context.Rounds.Where(r => r.GameSessionId == gameFound.Id) .ToListAsync();
+                var roundsPlayed = await _context
+                    .Rounds.Where(r => r.GameSessionId == gameFound.Id)
+                    .ToListAsync();
 
                 return (gameFound, moves, roundCreated, roundsPlayed.Count, roundsPlayed);
             }
@@ -181,7 +228,10 @@ namespace MagnumServiceApi.Services
             catch (DbUpdateException ex)
             {
                 await transaction.RollbackAsync();
-                throw new ApplicationException("An error occurred while updating the database.", ex);
+                throw new ApplicationException(
+                    "An error occurred while updating the database.",
+                    ex
+                );
             }
             catch (Exception ex)
             {
